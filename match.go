@@ -52,25 +52,9 @@ func main() {
 	} else {
 		fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
 		hostels = KMLGetLocations(*hostelFile)
-		//fmt.Printf("%v\n", hostels[:5])
 		fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
 		waterfalls = crawlWiki(*waterURL)
-		for _, m := range hostels.Markers {
-			fmt.Printf("%v\n", m)
-		}
-		for _, m := range waterfalls.Markers {
-			fmt.Printf("%v\n", m)
-		}
 		fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
-
-		// find the corners:
-		// [[bottom], [top],
-		//  [left],   [right]]
-		bounds := [][]Marker{{waterfalls.Markers[waterfalls.FindRanges(true, false)],
-			waterfalls.Markers[waterfalls.FindRanges(true, true)]},
-			{waterfalls.Markers[waterfalls.FindRanges(false, false)],
-				waterfalls.Markers[waterfalls.FindRanges(false, true)]}}
-		fmt.Println(bounds)
 
 		// save cached data to file
 		n, err := hostels.SaveCSV(*hostelSave)
@@ -84,12 +68,14 @@ func main() {
 		}
 		fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 	}
-	for _, m := range hostels.Markers {
-		fmt.Printf("%v\n", m)
-	}
-	fmt.Println()
-	for _, m := range waterfalls.Markers {
-		fmt.Printf("%v\n", m)
+	if *verbose {
+		for _, m := range hostels.Markers {
+			fmt.Printf("%v\n", m)
+		}
+		fmt.Println()
+		for _, m := range waterfalls.Markers {
+			fmt.Printf("%v\n", m)
+		}
 	}
 	fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
 
@@ -244,7 +230,18 @@ func GetLocationFromWikiPage(wikiURL string) (Marker, error) {
 	// now we need to extract the location from the coord string, and convert
 	// it if necessary to decimal format.
 	// firstly, get rid of the "{{coord|" bit (the coordinate starts after it)
-	begIndex := strings.Index(coord, "{{coord")
+	begIndex := strings.Index(coord, "{{coord|")
+	if begIndex == -1 {
+		begIndex = strings.Index(coord, "{{Coord|")
+	}
+	// The + 1 in these next two account for the extra space.
+	// Really, any amount of whitespace should be checked for.
+	if begIndex == -1 {
+		begIndex = strings.Index(coord, "{{coord |") + 1
+	}
+	if begIndex == -1 {
+		begIndex = strings.Index(coord, "{{Coord |") + 1
+	}
 	coord = coord[begIndex+8:]
 	// remove any leading "|" s, since they'll mess up the splitting bit
 	for coord[0] == '|' {
@@ -390,10 +387,15 @@ type Marker struct {
 // when max is true, the maximum is found;
 // when max is false, the minimum is found.
 func (m Markers) FindRanges(lat bool, max bool) int {
-	maxValue := 0.0
-	var maxIndex int
+	var maxValue float64
+	if lat {
+		maxValue = m.Markers[0].Lat
+	} else {
+		maxValue = m.Markers[1].Long
+	}
+	var maxIndex int = 0
 	var curValue float64 = 0.0
-	for i := range m.Markers {
+	for i := range m.Markers[1:] {
 		if lat {
 			curValue = m.Markers[i].Lat
 		} else {

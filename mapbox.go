@@ -15,7 +15,10 @@ func MapboxStatic(m Markers, fname string) error {
 	// it is possible to just use "auto" instead of a bbox for this next field
 	// (which defines the field of view)
 	// and then the overlays (markers) are used to fit the field of view.
-	suffix := "/" + /* formatBounds(m) */ "auto" + "/800x920?access_token="
+	suffix := "/" + formatBounds(m, 0.05) /* "auto"*/ + "/800x920?access_token="
+	if *verbose {
+		fmt.Printf("Bounds for %s: %v\n", fname, formatBounds(m, 0.05))
+	}
 	api_key := "sk.eyJ1IjoicGhvZWJvcyIsImEiOiJja201b2o4ZHEwZzl6Mm5ud2o4bXd0NjhlIn0.lEiKI4kRVe0Ao4TConJfQQ"
 
 	var markersMapbox string
@@ -27,7 +30,7 @@ func MapboxStatic(m Markers, fname string) error {
 	markersMapbox = markersMapbox[:len(markersMapbox)-1]
 
 	imgP, err := http.Get(baseURL + query + markersMapbox + suffix + api_key)
-	fmt.Printf("GET: %s\n", baseURL+query+markersMapbox+suffix+api_key)
+	//fmt.Printf("GET: %s\n", baseURL+query+markersMapbox+suffix+api_key)
 	if err != nil {
 		return err
 	}
@@ -40,8 +43,15 @@ func MapboxStatic(m Markers, fname string) error {
 
 // formatBounds makes a bbox given a Markers
 // in the order min(long), min(lat), max(long), max(lat)
-func formatBounds(m Markers) string {
-	return fmt.Sprintf("[%f,%f,%f,%f]", m.Markers[m.FindRanges(false, false)].Long, m.Markers[m.FindRanges(true, false)].Lat, m.Markers[m.FindRanges(false, true)].Long, m.Markers[m.FindRanges(true, true)].Lat)
+// with optional spacing as a fraction of the width/height.
+func formatBounds(m Markers, space float64) string {
+	left := m.Markers[m.FindRanges(false, false)].Long
+	bot := m.Markers[m.FindRanges(true, false)].Lat
+	right := m.Markers[m.FindRanges(false, true)].Long
+	top := m.Markers[m.FindRanges(true, true)].Lat
+	lrspace := (right - left) * space
+	btspace := (top - bot) * space
+	return fmt.Sprintf("[%f,%f,%f,%f]", left-lrspace, bot-btspace, right+lrspace, top+btspace)
 }
 
 // markerToMapbox takes a Marker which has a position, and optionally a label and color
