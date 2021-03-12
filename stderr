@@ -1,0 +1,64 @@
+Reading hostels XML...
+Crawling waterfalls list webpage...
+Parsed list page, following links...
+Broada_Falls: 404 Not Found
+Catrigg_Force: 404 Not Found
+Clampitt_Falls: 404 Not Found
+Doe_Tor_Falls: 404 Not Found
+Esk_Falls: 404 Not Found
+https://en.wikipedia.org/wiki/Golitha_Falls :  redirecting to River_Fowey
+Carmine_Falls: 404 Not Found
+https://en.wikipedia.org/wiki/Hollowbrook_Waterfall :  redirecting to Martinhoe
+Horeshoe_Falls: 404 Not Found
+https://en.wikipedia.org/wiki/Ingleton_Falls :  redirecting to Ingleton_Waterfalls_Trail
+https://en.wikipedia.org/wiki/Kinder_Downfall :  redirecting to River_Kinder
+Lady_Exmouth_Falls: 404 Not Found
+Linton_Falls: 404 Not Found
+https://en.wikipedia.org/wiki/Pecca_Falls :  redirecting to Ingleton_Waterfalls_Trail
+Raddick_Hill_Falls: 404 Not Found
+Rival_Falls: 404 Not Found
+Rutter_Force: 404 Not Found
+Rydal_Falls: 404 Not Found
+Scaleber_Force: No location found
+Shavercombe_Falls: 404 Not Found
+Sherrycombe_Waterfall: 404 Not Found
+Stainforth_Force: 404 Not Found
+Stanley_Force: 404 Not Found
+Summerhill_Force: 404 Not Found
+https://en.wikipedia.org/wiki/Taylorgill_Force :  redirecting to Taylor_Gill_Force
+Whitelady_Waterfall: 404 Not Found
+Stock_Ghyll_Force: 404 Not Found
+Dyserth_Falls: 404 Not Found
+Pwll-y-Gerwyn: 404 Not Found
+https://en.wikipedia.org/wiki/Grey_Mare's_Tail,_Llanrwst :  redirecting to Grey_Mare's_Tail,_Conwy
+https://en.wikipedia.org/wiki/Sgwd_Henrhyd :  redirecting to Henrhyd_Falls
+https://en.wikipedia.org/wiki/Horseshoe_Falls,_Wales :  redirecting to Horseshoe_Falls_(Wales)
+Llech_Sychryd: 404 Not Found
+Machno_falls: 404 Not Found
+Pistyll_Du: 404 Not Found
+Pistyll_Gwyn: 404 Not Found
+Pistyll_Gwyn: 404 Not Found
+Pistyll_Henfynachlog: 404 Not Found
+Pistyll_Rhyd-y-meinciau: 404 Not Found
+https://en.wikipedia.org/wiki/Pistyll_y_Gaseg :  redirecting to Aberdaron
+Pwll_y_Crochan: 404 Not Found
+Rhaeadr-bach: 404 Not Found
+https://en.wikipedia.org/wiki/Rhaeadr_Cynfal :  redirecting to River_Dwyryd
+Rhaeadr_y_Cwm: 404 Not Found
+Rhaeadr_Du: 404 Not Found
+Rhaeadr_Du: 404 Not Found
+Rhaeadr_Mawddach: 404 Not Found
+Rhaeadr_Ogwen: 404 Not Found
+https://en.wikipedia.org/wiki/Sgwd_Clun-gwyn :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_Ddwli_Isaf :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_Ddwli_Uchaf :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_Isaf_Clun-gwyn :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_Einion_Gam :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_Gwladus :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_y_Bedol :  redirecting to Waterfall_Country_(Wales)
+https://en.wikipedia.org/wiki/Sgwd_yr_Eira :  redirecting to Afon_Hepste
+https://en.wikipedia.org/wiki/Sgwd_y_Pannwr :  redirecting to Waterfall_Country_(Wales)
+Got 182 hostels,
+    61 waterfalls
+saved 5731 bytes to hostels_cache.csv
+saved 2126 bytes to waterfalls_cache.csv

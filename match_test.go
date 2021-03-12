@@ -13,15 +13,15 @@ func TestDmsToDec(t *testing.T) {
 
 func TestFindRanges(t *testing.T) {
 	m := Markers{
-		Markers: []Marker{Marker{
+		Markers: []Marker{{
 			Name: "a",
-			Lat:  -10,
-			Long: 10,
-		}, Marker{
+			Lat:  10,
+			Long: -10,
+		}, {
 			Name: "b",
 			Lat:  20,
-			Long: -10,
-		}, Marker{
+			Long: -15,
+		}, {
 			Name: "c",
 			Lat:  15,
 			Long: -20,

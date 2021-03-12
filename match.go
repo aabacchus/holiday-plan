@@ -1,4 +1,4 @@
-// package main finds hostels and waterfalls in the UK which are close to each other.
+// finds hostels and waterfalls in the UK which are close to each other.
 package main
 
 import (
@@ -15,24 +15,57 @@ import (
 	"strings"
 )
 
+var verbose *bool
+
 func main() {
 	hostelFile := flag.String("hostels", "hostels.xml", "xml file of hostels with location data")
 	waterUrl := flag.String("waterfalls", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
+	verbose = flag.Bool("v", false, "print verbose output to stderr")
+	hostelSave := flag.String("cacheh", "hostels_cache.csv", "saves hostel data to the file")
+	waterfallSave := flag.String("cachew", "waterfalls_cache.csv", "saves waterfall data to the file")
 	flag.Parse()
 
+	fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
 	hostels := XmlGetLocations(*hostelFile)
 	//fmt.Printf("%v\n", hostels[:5])
-	//waterfalls := WikiGetLocations(*waterUrl)
+	fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
 	waterfalls := CrawlWiki(*waterUrl)
 	_, _ = waterfalls, hostels
-	fmt.Printf("%+v\n", (waterfalls))
+	for _, m := range hostels.Markers {
+		fmt.Printf("%v\n", m)
+	}
+	for _, m := range waterfalls.Markers {
+		fmt.Printf("%v\n", m)
+	}
+	fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
+
+	// find the corners:
+	// [[bottom], [top],
+	//  [left],   [right]]
+	bounds := [][]Marker{{waterfalls.Markers[waterfalls.FindRanges(true, false)],
+		waterfalls.Markers[waterfalls.FindRanges(true, true)]},
+		{waterfalls.Markers[waterfalls.FindRanges(false, false)],
+			waterfalls.Markers[waterfalls.FindRanges(false, true)]}}
+	fmt.Println(bounds)
+
+	// save cached data to file
+	n, err := hostels.SaveCSV(*hostelSave)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
+	n, err = waterfalls.SaveCSV(*waterfallSave)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 }
 
 func MakeWikiUrl(pagename string) string {
 	return "https://en.wikipedia.org/wiki/" + pagename
 }
 
-func CrawlWiki(listURL string) []Marker {
+func CrawlWiki(listURL string) Markers {
 	lines, err := GetWikiText(listURL)
 	if err != nil {
 		log.Panic(err)
@@ -63,14 +96,18 @@ func CrawlWiki(listURL string) []Marker {
 		}
 	}
 
-	var formatted []Marker
+	fmt.Fprintf(os.Stderr, "Parsed list page, following links...\n")
+
+	var formatted Markers
 	for _, f := range waterfalls {
 		//fmt.Println(f)
 		mark, err := GetLocationFromWikiPage(f)
 		if err != nil {
-			fmt.Printf("%s: %v\n", f, err)
+			if *verbose {
+				fmt.Fprintf(os.Stderr, "%s: %v\n", f, err)
+			}
 		} else {
-			formatted = append(formatted, mark)
+			formatted.Markers = append(formatted.Markers, mark)
 		}
 	}
 
@@ -90,7 +127,9 @@ func GetWikiText(url string) ([]string, error) {
 	// check if it is a redirect page, and if so, follow it:
 	if strings.Contains(lines[0], "REDIRECT") || strings.Contains(lines[0], "redirect") {
 		redirectURL, _ := ParseXWikiLinks(lines[0])
-		fmt.Printf("\tredirecting to %s\n", redirectURL)
+		if *verbose {
+			fmt.Fprintf(os.Stderr, "%s :  redirecting to %s\n", url, redirectURL)
+		}
 		return GetWikiText(MakeWikiUrl(redirectURL))
 	}
 	return lines, err
@@ -218,7 +257,7 @@ func ParseXWikiLinks(s string) (string, error) {
 	return s, nil
 }
 
-func XmlGetLocations(filename string) []Marker {
+func XmlGetLocations(filename string) Markers {
 	hFile, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -236,7 +275,6 @@ func XmlGetLocations(filename string) []Marker {
 	// Other elements are either retired or independent, and negligible.
 
 	n := len(hostels.Documents.Folders[0].Placemarks)
-	fmt.Println("n: ", n)
 	formatted := make([]Marker, n)
 	for i, place := range hostels.Documents.Folders[0].Placemarks {
 		formatted[i].Name = place.Name
@@ -245,44 +283,15 @@ func XmlGetLocations(filename string) []Marker {
 		formatted[i].Lat, _ = strconv.ParseFloat(gps[1], 64)
 	}
 
-	return formatted
+	return Markers{Markers: formatted}
 }
 
-func WikiGetLocations(url string) Wiki {
-	page, err := http.Get(url)
-	if err != nil {
-		log.Panic(err)
-	}
-	defer page.Body.Close()
-	fmt.Printf("%s\n", page.Status)
-	if page.StatusCode == 404 {
-		os.Exit(1)
-	}
-	//fmt.Printf("http.Get page is a %T\n", page)
-
-	pageBytes, _ := ioutil.ReadAll(page.Body)
-
-	//doc, err := html.Parse(strings.NewReader(fmt.Sprintf("%s", pageBytes)))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//fmt.Printf("%+v\n", doc.FirstChild.NextSibling.LastChild.FirstChild.NextSibling.NextSibling.NextSibling.NextSibling)
-
-	var waters Wiki
-	if err := xml.Unmarshal([]byte(pageBytes), &waters); err != nil {
-		log.Fatal(err)
-	}
-	//fmt.Printf("%v\n", waters.htmls)
-	return waters
-}
-
+// Markers wraps a slice of type Marker
 type Markers struct {
 	Markers []Marker
 }
 
-// Marker is a basic point with a location expressed in decimal coordinates
-// and a name.
+// Marker is a basic point with a name and a location expressed in decimal coordinates
 type Marker struct {
 	Name string
 	Lat  float64
@@ -296,9 +305,9 @@ type Marker struct {
 // when max is true, the maximum is found;
 // when max is false, the minimum is found.
 func (m Markers) FindRanges(lat bool, max bool) int {
-	maxValue := 0.
+	maxValue := 0.0
 	var maxIndex int
-	var curValue float64
+	var curValue float64 = 0.0
 	for i := range m.Markers {
 		if lat {
 			curValue = m.Markers[i].Lat
@@ -317,30 +326,27 @@ func (m Markers) FindRanges(lat bool, max bool) int {
 	return maxIndex
 }
 
-type Wiki struct {
-	html Html `xml:"html"`
-}
+// SaveCSV saves a Markers to a file in CSV format,
+// with each line of the CSV having 3 fields, delimited by commas,
+// representing Markers[i].Name, Lat, Long respectively.
+// The number of bytes written and an error is returned.
+// if the filename provided already exists, an error is returned.
+func (m Markers) SaveCSV(filename string) (int, error) {
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
+	if err != nil {
+		return 0, err
+	}
 
-type IntoDiv struct {
-	div Div `xml:"html"`
-}
+	var bytesWritten int
+	for _, mark := range m.Markers {
+		n, err := fmt.Fprintln(f, fmt.Sprintf("%s,%f,%f", mark.Name, mark.Lat, mark.Long))
+		if err != nil {
+			return bytesWritten, nil
+		}
+		bytesWritten += n
+	}
 
-type Html struct {
-	XMLName xml.Name `xml:"html"`
-	class   string   `xml:",attr"`
-	head    string   `xml:"head"`
-	body    Body     `xml:"body"`
-}
-
-type Body struct {
-	div Div `xml:"div"`
-}
-
-type Div struct {
-	XMLName xml.Name `xml:"html"`
-	id      string   `xml:"id,attr"`
-	class   string   `xml:"class,attr"`
-	//div   Div    `xml:"div"`
+	return bytesWritten, err
 }
 
 type Kml struct {
