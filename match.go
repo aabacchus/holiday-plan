@@ -1,7 +1,10 @@
 // finds hostels and waterfalls in the UK which are close to each other.
 package main
 
+// BUG(): Markers.FindRanges() doesn't seem to work for the waterfall data.
+
 import (
+	"encoding/csv"
 	"encoding/xml"
 	"errors"
 	"flag"
@@ -13,52 +16,119 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var verbose *bool
 
 func main() {
-	hostelFile := flag.String("hostels", "hostels.xml", "xml file of hostels with location data")
-	waterURL := flag.String("waterfalls", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
+	hostelFile := flag.String("hostelFile", "hostels.xml", "xml file of hostels with location data")
+	waterURL := flag.String("waterfallsURL", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
 	verbose = flag.Bool("v", false, "print verbose output to stderr")
-	hostelSave := flag.String("cacheh", "hostels_cache.csv", "saves hostel data to the file")
-	waterfallSave := flag.String("cachew", "waterfalls_cache.csv", "saves waterfall data to the file")
+	hostelSave := flag.String("hostelsCache", "hostels_cache.csv", "saves hostel data to the file")
+	waterfallSave := flag.String("waterfallsCache", "waterfalls_cache.csv", "saves waterfall data to the file")
+	useCache := flag.Bool("use-cache", false, "if provided, use the cache rather than File/URL (requires the cache filename flags)")
 	flag.Parse()
 
-	fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
-	hostels := KMLGetLocations(*hostelFile)
-	//fmt.Printf("%v\n", hostels[:5])
-	fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
-	waterfalls := crawlWiki(*waterURL)
-	_, _ = waterfalls, hostels
+	var hostels, waterfalls Markers
+	var err error
+
+	if *useCache {
+		if *waterfallSave == "" {
+			log.Fatal("Please provide the filename of the waterfall cache")
+		}
+		if *hostelSave == "" {
+			log.Fatal("Please provide the filename of the hostel cache")
+		}
+		hostels, err = CSVtoMarkers(*hostelSave)
+		if err != nil {
+			log.Fatal(err)
+		}
+		waterfalls, err = CSVtoMarkers(*waterfallSave)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+		fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
+		hostels = KMLGetLocations(*hostelFile)
+		//fmt.Printf("%v\n", hostels[:5])
+		fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
+		waterfalls = crawlWiki(*waterURL)
+		for _, m := range hostels.Markers {
+			fmt.Printf("%v\n", m)
+		}
+		for _, m := range waterfalls.Markers {
+			fmt.Printf("%v\n", m)
+		}
+		fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
+
+		// find the corners:
+		// [[bottom], [top],
+		//  [left],   [right]]
+		bounds := [][]Marker{{waterfalls.Markers[waterfalls.FindRanges(true, false)],
+			waterfalls.Markers[waterfalls.FindRanges(true, true)]},
+			{waterfalls.Markers[waterfalls.FindRanges(false, false)],
+				waterfalls.Markers[waterfalls.FindRanges(false, true)]}}
+		fmt.Println(bounds)
+
+		// save cached data to file
+		n, err := hostels.SaveCSV(*hostelSave)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
+		n, err = waterfalls.SaveCSV(*waterfallSave)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
+	}
 	for _, m := range hostels.Markers {
 		fmt.Printf("%v\n", m)
 	}
+	fmt.Println()
 	for _, m := range waterfalls.Markers {
 		fmt.Printf("%v\n", m)
 	}
 	fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
 
-	// find the corners:
-	// [[bottom], [top],
-	//  [left],   [right]]
-	bounds := [][]Marker{{waterfalls.Markers[waterfalls.FindRanges(true, false)],
-		waterfalls.Markers[waterfalls.FindRanges(true, true)]},
-		{waterfalls.Markers[waterfalls.FindRanges(false, false)],
-			waterfalls.Markers[waterfalls.FindRanges(false, true)]}}
-	fmt.Println(bounds)
+	hostelsImg := "map-hostels-" + time.Now().Format("2006-01-02-1504") + ".png"
+	err = MapboxStatic(hostels, hostelsImg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// save cached data to file
-	n, err := hostels.SaveCSV(*hostelSave)
+	waterfallsImg := "map-waterfalls-" + time.Now().Format("2006-01-02-1504") + ".png"
+	err = MapboxStatic(waterfalls, waterfallsImg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
-	n, err = waterfalls.SaveCSV(*waterfallSave)
+
+	fmt.Printf("Wrote maps to %s and %s.\n", hostelsImg, waterfallsImg)
+}
+
+// CSVtoMarkers takes the name of a CSV file and returns a Markers.
+// The CSV may have been produced by Markers.SaveCSV:
+// the file has three fields: name, lat, long.
+func CSVtoMarkers(fname string) (Markers, error) {
+	f, err := os.Open(fname)
 	if err != nil {
-		log.Fatal(err)
+		return Markers{}, err
 	}
-	fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
+	r := csv.NewReader(f)
+	lines, err := r.ReadAll()
+	if err != nil {
+		return Markers{}, err
+	}
+	m := Markers{make([]Marker, len(lines))}
+	for i, line := range lines {
+		m.Markers[i].Name = line[0]
+		m.Markers[i].Lat, err = strconv.ParseFloat(line[1], 64)
+		m.Markers[i].Long, _ = strconv.ParseFloat(line[2], 64)
+	}
+
+	return m, err
 }
 
 // MakeWikiURL takes a formatted Wikipedia pagename (ie spaces are underscores)
@@ -344,6 +414,7 @@ func (m Markers) FindRanges(lat bool, max bool) int {
 // SaveCSV saves a Markers to a file in CSV format,
 // with each line of the CSV having 3 fields, delimited by commas,
 // representing Markers[i].Name, Lat, Long respectively.
+// The first field (Name) is surrounded by double quotes (" ").
 // The number of bytes written and an error is returned.
 // if the filename provided already exists, an error is returned.
 func (m Markers) SaveCSV(filename string) (int, error) {
@@ -354,7 +425,7 @@ func (m Markers) SaveCSV(filename string) (int, error) {
 
 	var bytesWritten int
 	for _, mark := range m.Markers {
-		n, err := fmt.Fprintln(f, fmt.Sprintf("%s,%f,%f", mark.Name, mark.Lat, mark.Long))
+		n, err := fmt.Fprintln(f, fmt.Sprintf("\"%s\",%f,%f", mark.Name, mark.Lat, mark.Long))
 		if err != nil {
 			return bytesWritten, nil
 		}

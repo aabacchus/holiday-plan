@@ -1,3 +1,8 @@
 bounds bit isn't working
 actually match waterfalls to hostels
 plot everything on a map
+
+hostels.xml is only England and Wales (YHA);
+and Scottish waterfalls are ignored by the scraper.
+
+something wrong with high force latitude
