@@ -19,17 +19,17 @@ var verbose *bool
 
 func main() {
 	hostelFile := flag.String("hostels", "hostels.xml", "xml file of hostels with location data")
-	waterUrl := flag.String("waterfalls", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
+	waterURL := flag.String("waterfalls", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
 	verbose = flag.Bool("v", false, "print verbose output to stderr")
 	hostelSave := flag.String("cacheh", "hostels_cache.csv", "saves hostel data to the file")
 	waterfallSave := flag.String("cachew", "waterfalls_cache.csv", "saves waterfall data to the file")
 	flag.Parse()
 
 	fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
-	hostels := XmlGetLocations(*hostelFile)
+	hostels := KMLGetLocations(*hostelFile)
 	//fmt.Printf("%v\n", hostels[:5])
 	fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
-	waterfalls := CrawlWiki(*waterUrl)
+	waterfalls := crawlWiki(*waterURL)
 	_, _ = waterfalls, hostels
 	for _, m := range hostels.Markers {
 		fmt.Printf("%v\n", m)
@@ -61,11 +61,13 @@ func main() {
 	fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 }
 
-func MakeWikiUrl(pagename string) string {
+// MakeWikiURL takes a formatted Wikipedia pagename (ie spaces are underscores)
+// and adds the English Wikipedia prefix.
+func MakeWikiURL(pagename string) string {
 	return "https://en.wikipedia.org/wiki/" + pagename
 }
 
-func CrawlWiki(listURL string) Markers {
+func crawlWiki(listURL string) Markers {
 	lines, err := GetWikiText(listURL)
 	if err != nil {
 		log.Panic(err)
@@ -114,8 +116,14 @@ func CrawlWiki(listURL string) Markers {
 	return formatted
 }
 
+// GetWikiText takes the url of a normal Wikipedia page
+// and returns the lines in text/x-wiki format.
+// It follows redirects and says so by printing to Stderr.
 func GetWikiText(url string) ([]string, error) {
 	page, err := http.Get(url + "?action=raw")
+	if err != nil {
+		return []string{""}, err
+	}
 	defer page.Body.Close()
 	if page.StatusCode == 404 {
 		// when 404, page.Status should be "404 Not Found"
@@ -130,13 +138,17 @@ func GetWikiText(url string) ([]string, error) {
 		if *verbose {
 			fmt.Fprintf(os.Stderr, "%s :  redirecting to %s\n", url, redirectURL)
 		}
-		return GetWikiText(MakeWikiUrl(redirectURL))
+		return GetWikiText(MakeWikiURL(redirectURL))
 	}
 	return lines, err
 }
 
+// GetLocationFromWikiPage takes a Wikipedia page name, and returns
+// a Marker with the pagename as a Name and the location from a {{coord}}
+// tag in the Wikitext.
+// The location data is converted to decimal form if necessary.
 func GetLocationFromWikiPage(wikiURL string) (Marker, error) {
-	lines, err := GetWikiText(MakeWikiUrl(wikiURL))
+	lines, err := GetWikiText(MakeWikiURL(wikiURL))
 	if err != nil {
 		return Marker{}, err
 	}
@@ -220,13 +232,15 @@ func GetLocationFromWikiPage(wikiURL string) (Marker, error) {
 func DmsToDec(dms string) float64 {
 	s := strings.Split(dms, "|")
 	var dec float64 = 0
-	for i, _ := range s {
+	for i := range s {
 		dms_float, _ := strconv.ParseFloat(s[i], 64)
 		dec += dms_float / math.Pow(60.0, float64(i))
 	}
 	return dec
 }
 
+// ParseXWikiLinks takes a string and returns a correctly formatted
+// string of the Wikipedia url suffix of the first link found in the string.
 func ParseXWikiLinks(s string) (string, error) {
 	if !strings.Contains(s, "[[") && !strings.Contains(s, "]]") {
 		return "", errors.New("not a Wiki link")
@@ -257,7 +271,8 @@ func ParseXWikiLinks(s string) (string, error) {
 	return s, nil
 }
 
-func XmlGetLocations(filename string) Markers {
+// KMLGetLocations extracts location data from an xml file.
+func KMLGetLocations(filename string) Markers {
 	hFile, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -349,6 +364,8 @@ func (m Markers) SaveCSV(filename string) (int, error) {
 	return bytesWritten, err
 }
 
+// Kml provides the highest level of tags in a KML-type XML file
+// which are relevant for finding location data.
 type Kml struct {
 	XMLName   xml.Name `xml:"kml"`
 	Documents Document `xml:"Document"`
