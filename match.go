@@ -21,6 +21,7 @@ import (
 
 var (
 	verbose *bool
+	useSQL  bool
 )
 
 func usage() {
@@ -48,8 +49,26 @@ func main() {
 	flag.StringVar(&mboxDs.style, "mapboxstyle", "", "style of mapbox map")
 	flag.StringVar(&mboxDs.apikey, "mapboxapi", "", "api key for mapboxuname")
 
+	// MySQL credentials
+	// If a username is provided and *useCache == false, the obtained data is saved to the database.
+	// If a username is provided and *useCache == true, the database is used as the source of cached data.
+	// If no username is provided, SQL is not used.
+	sqlUname := flag.String("sqluname", "", "username for MySQL db. If this is not provided, no SQL databases are used.")
+	sqlPwd := flag.String("sqlpwd", "", "password for MySQL db")
+	sqlDbName := flag.String("sqldb", "cache", "name of MySQL db")
+
 	flag.Usage = usage
 	flag.Parse()
+
+	if *sqlUname == "" {
+		// not using database
+		if *verbose {
+			fmt.Fprintf(os.Stderr, "not using MySQL, username not provided\n")
+		}
+		_, _ = sqlPwd, sqlDbName
+	} else {
+		useSQL = true
+	}
 
 	if *staticImgs && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
 		log.Fatal("insufficient credentials provided to generate mapbox maps")
@@ -92,8 +111,37 @@ func main() {
 		} else {
 			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 		}
+
+		if useSQL {
+			db, err := sqlDBConnection(*sqlUname, *sqlPwd, *sqlDbName)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer db.Close()
+
+			log.Printf("Successfully connected to database %q", *sqlDbName)
+			err = sqlCreateTable("hostels", db)
+			if err != nil {
+				log.Fatal(err)
+			}
+			n, err := sqlWriteToDB(db, "hostels", hostels)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("Wrote %v rows to table %q", n, "hostels")
+
+			err = sqlCreateTable("waterfalls", db)
+			if err != nil {
+				log.Fatal(err)
+			}
+			n, err = sqlWriteToDB(db, "waterfalls", waterfalls)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("Wrote %v rows to table %q", n, "waterfalls")
+		}
 	}
-	// not sure how useful this is
+	// not sure how useful this is; maybe add a vv flag for very verbose output
 	if *verbose {
 		for _, m := range hostels.Markers {
 			fmt.Printf("%v\n", m)
