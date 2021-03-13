@@ -91,6 +91,27 @@ func sqlWriteToDB(db *sql.DB, tableName string, m Markers) (int64, error) {
 	return rows, nil
 }
 
+func sqlQueryTable(db *sql.DB, tableName string) (Markers, error) {
+	var m Markers
+	rows, err := db.Query("SELECT name, latit, longit FROM waterfalls LIMIT 1")
+	if err != nil {
+		return Markers{}, err
+	}
+	defer rows.Close()
+
+	// go through each row
+	for rows.Next() {
+		var mark Marker
+		err := rows.Scan(&mark.Name, &mark.Lat, &mark.Long)
+		if err != nil {
+			return m, err
+		}
+		m.Markers = append(m.Markers, mark)
+	}
+	err = rows.Err()
+	return m, err
+}
+
 func sqlCreateTable(tablename string, db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS ` + tablename + `(
 			id INT PRIMARY KEY AUTO_INCREMENT,

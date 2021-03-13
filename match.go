@@ -4,6 +4,7 @@ package main
 // BUG(): Markers.FindRanges() doesn't seem to work for the waterfall data.
 
 import (
+	"database/sql"
 	"encoding/csv"
 	"encoding/xml"
 	"errors"
@@ -31,17 +32,18 @@ func usage() {
 		"\t\t\t[-static]\n"+
 		"\t\t\t[-sqluname username] [-sqlpwd password] [-sqldb myDB]\n\n", os.Args[0])
 	flag.PrintDefaults()
-	fmt.Fprintf(os.Stderr, "\nholiday-plan is a program to get, save, or plot data about hostels and waterfalls in the UK.\n"+
-		"If a SQL username is provided, the SQL database is either written to using the obtained data, or read from, if use-cache is true.\n")
+	fmt.Fprintf(os.Stderr, "\nholiday-plan is a program to get, save, or plot data about hostels and waterfalls in the UK.\n\n"+
+		"If a SQL username is provided, the SQL database is either written to using the obtained data, or read from, if use-cache is true.\n"+
+		"Otherwise, the same is done but with local csv files (which will not be overwritten)\n")
 }
 
 func main() {
-	hostelFile := flag.String("hostelFile", "hostels.xml", "xml file of hostels with location data")
+	hostelFile := flag.String("hostelFile", "hostels.xml", "kml file of hostels with location data")
 	waterURL := flag.String("waterfallsURL", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
 	verbose = flag.Bool("v", false, "print verbose output to stderr")
 	hostelSave := flag.String("hostelCache", "hostels_cache.csv", "saves hostel data to the file")
 	waterfallSave := flag.String("waterfallCache", "waterfalls_cache.csv", "saves waterfall data to the file")
-	useCache := flag.Bool("use-cache", false, "use the cache rather than File/URL (requires the cache filename flags)")
+	useCache := flag.Bool("use-cache", false, "use the cache rather than file/URL (requires the cache filename flags)")
 
 	staticImgs := flag.Bool("static", false, "generate static PNGs of maps with markers")
 	var mboxDs mapboxDetails
@@ -60,6 +62,8 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	var dbase *sql.DB
+
 	if *sqlUname == "" {
 		// not using database
 		if *verbose {
@@ -68,6 +72,23 @@ func main() {
 		_, _ = sqlPwd, sqlDbName
 	} else {
 		useSQL = true
+
+		// setup sql database
+		dbase, err := sqlDBConnection(*sqlUname, *sqlPwd, *sqlDbName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer dbase.Close()
+		log.Printf("MySQL: successfully connected to database %q", *sqlDbName)
+
+		err = sqlCreateTable("hostels", dbase)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = sqlCreateTable("waterfalls", dbase)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if *staticImgs && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
@@ -78,19 +99,32 @@ func main() {
 	var err error
 
 	if *useCache {
-		if *waterfallSave == "" {
-			log.Fatal("Please provide the filename of the waterfall cache")
-		}
-		if *hostelSave == "" {
-			log.Fatal("Please provide the filename of the hostel cache")
-		}
-		hostels, err = CSVtoMarkers(*hostelSave)
-		if err != nil {
-			log.Fatal(err)
-		}
-		waterfalls, err = CSVtoMarkers(*waterfallSave)
-		if err != nil {
-			log.Fatal(err)
+		if useSQL {
+			log.Println("MySQL: loading cache from database...")
+			hostels, err = sqlQueryTable(dbase, "hostels")
+			if err != nil {
+				log.Fatal(err)
+			}
+			waterfalls, err = sqlQueryTable(dbase, "waterfalls")
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			if *waterfallSave == "" {
+				log.Fatal("Please provide the filename of the waterfall cache")
+			}
+			if *hostelSave == "" {
+				log.Fatal("Please provide the filename of the hostel cache")
+			}
+			log.Println("Loading cache from CSVs...")
+			hostels, err = CSVtoMarkers(*hostelSave)
+			if err != nil {
+				log.Fatal(err)
+			}
+			waterfalls, err = CSVtoMarkers(*waterfallSave)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	} else {
 		fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
@@ -98,47 +132,35 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
 		waterfalls = crawlWiki(*waterURL)
 
-		// save cached data to file
-		n, err := hostels.SaveCSV(*hostelSave)
-		if err != nil {
-			log.Println(err)
-		} else {
-			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
-		}
-		n, err = waterfalls.SaveCSV(*waterfallSave)
-		if err != nil {
-			log.Println(err)
-		} else {
-			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
-		}
-
 		if useSQL {
-			db, err := sqlDBConnection(*sqlUname, *sqlPwd, *sqlDbName)
+			// save cached data to SQL db
+			log.Println("Saving cached data to MySQL database...")
+			n, err := sqlWriteToDB(dbase, "hostels", hostels)
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer db.Close()
+			log.Printf("MySQL: wrote %v rows to table %q", n, "hostels")
 
-			log.Printf("Successfully connected to database %q", *sqlDbName)
-			err = sqlCreateTable("hostels", db)
+			n, err = sqlWriteToDB(dbase, "waterfalls", waterfalls)
 			if err != nil {
 				log.Fatal(err)
 			}
-			n, err := sqlWriteToDB(db, "hostels", hostels)
+			log.Printf("MySQL: wrote %v rows to table %q", n, "waterfalls")
+		} else {
+			// save cached data to csv file
+			log.Println("Saving cached data to csv files...")
+			n, err := hostels.SaveCSV(*hostelSave)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
+			} else {
+				fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
 			}
-			log.Printf("Wrote %v rows to table %q", n, "hostels")
-
-			err = sqlCreateTable("waterfalls", db)
+			n, err = waterfalls.SaveCSV(*waterfallSave)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
+			} else {
+				fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 			}
-			n, err = sqlWriteToDB(db, "waterfalls", waterfalls)
-			if err != nil {
-				log.Fatal(err)
-			}
-			log.Printf("Wrote %v rows to table %q", n, "waterfalls")
 		}
 	}
 	// not sure how useful this is; maybe add a vv flag for very verbose output
