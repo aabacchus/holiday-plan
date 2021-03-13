@@ -19,16 +19,41 @@ import (
 	"time"
 )
 
-var verbose *bool
+var (
+	verbose *bool
+)
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: %s\t[-v] [-h]\n"+
+		"\t\t\t[-hostelFile hostels.xml] [-waterfallsURL https://en.wikipedia.org/wiki/List...]\n"+
+		"\t\t\t[-use-cache] [-hostelCache hostels_cache.csv] [-waterfallCache waterfalls_cache.csv]\n"+
+		"\t\t\t[-static]\n"+
+		"\t\t\t[-sqluname username] [-sqlpwd password] [-sqldb myDB]\n\n", os.Args[0])
+	flag.PrintDefaults()
+	fmt.Fprintf(os.Stderr, "\nholiday-plan is a program to get, save, or plot data about hostels and waterfalls in the UK.\n"+
+		"If a SQL username is provided, the SQL database is either written to using the obtained data, or read from, if use-cache is true.\n")
+}
 
 func main() {
 	hostelFile := flag.String("hostelFile", "hostels.xml", "xml file of hostels with location data")
 	waterURL := flag.String("waterfallsURL", "https://en.wikipedia.org/wiki/List_of_waterfalls_of_the_United_Kingdom", "waterfalls data url")
 	verbose = flag.Bool("v", false, "print verbose output to stderr")
-	hostelSave := flag.String("hostelsCache", "hostels_cache.csv", "saves hostel data to the file")
-	waterfallSave := flag.String("waterfallsCache", "waterfalls_cache.csv", "saves waterfall data to the file")
-	useCache := flag.Bool("use-cache", false, "if provided, use the cache rather than File/URL (requires the cache filename flags)")
+	hostelSave := flag.String("hostelCache", "hostels_cache.csv", "saves hostel data to the file")
+	waterfallSave := flag.String("waterfallCache", "waterfalls_cache.csv", "saves waterfall data to the file")
+	useCache := flag.Bool("use-cache", false, "use the cache rather than File/URL (requires the cache filename flags)")
+
+	staticImgs := flag.Bool("static", false, "generate static PNGs of maps with markers")
+	var mboxDs mapboxDetails
+	flag.StringVar(&mboxDs.uname, "mapboxuname", "", "mapbox.com username")
+	flag.StringVar(&mboxDs.style, "mapboxstyle", "", "style of mapbox map")
+	flag.StringVar(&mboxDs.apikey, "mapboxapi", "", "api key for mapboxuname")
+
+	flag.Usage = usage
 	flag.Parse()
+
+	if *staticImgs && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
+		log.Fatal("insufficient credentials provided to generate mapbox maps")
+	}
 
 	var hostels, waterfalls Markers
 	var err error
@@ -48,26 +73,27 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 	} else {
 		fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
 		hostels = KMLGetLocations(*hostelFile)
 		fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
 		waterfalls = crawlWiki(*waterURL)
-		fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
 
 		// save cached data to file
 		n, err := hostels.SaveCSV(*hostelSave)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+		} else {
+			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
 		}
-		fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *hostelSave)
 		n, err = waterfalls.SaveCSV(*waterfallSave)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+		} else {
+			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 		}
-		fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 	}
+	// not sure how useful this is
 	if *verbose {
 		for _, m := range hostels.Markers {
 			fmt.Printf("%v\n", m)
@@ -77,21 +103,37 @@ func main() {
 			fmt.Printf("%v\n", m)
 		}
 	}
-	fmt.Fprintf(os.Stderr, "Got %v hostels,\n    %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
+	fmt.Fprintf(os.Stderr, "Got %v hostels, %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
 
-	hostelsImg := "map-hostels-" + time.Now().Format("2006-01-02-1504") + ".png"
-	err = MapboxStatic(hostels, hostelsImg)
-	if err != nil {
-		log.Fatal(err)
+	if *staticImgs {
+		hostelsImg := "map-hostels-" + time.Now().Format("2006-01-02-1504") + ".png"
+		err = MapboxStatic(hostels, hostelsImg, mboxDs)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		waterfallsImg := "map-waterfalls-" + time.Now().Format("2006-01-02-1504") + ".png"
+		err = MapboxStatic(waterfalls, waterfallsImg, mboxDs)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Wrote maps to %s and %s.\n", hostelsImg, waterfallsImg)
 	}
 
-	waterfallsImg := "map-waterfalls-" + time.Now().Format("2006-01-02-1504") + ".png"
-	err = MapboxStatic(waterfalls, waterfallsImg)
-	if err != nil {
-		log.Fatal(err)
-	}
+}
 
-	fmt.Printf("Wrote maps to %s and %s.\n", hostelsImg, waterfallsImg)
+// longestName returns the index and length of the longest Name in a Markers.
+func (m Markers) longestName() (index int, length int) {
+	length = 0
+	index = 0
+	for i := range m.Markers {
+		if len(m.Markers[i].Name) > length {
+			length = len(m.Markers[i].Name)
+			index = i
+		}
+	}
+	return
 }
 
 // CSVtoMarkers takes the name of a CSV file and returns a Markers.

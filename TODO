@@ -1,5 +1,10 @@
 actually match waterfalls to hostels
 plot everything on one map, colour coded
+(note: mapbox sets the width automatically from my height and bbox)
 
 hostels.xml is only England and Wales (YHA);
 and Scottish waterfalls are ignored by the scraper.
+
+Make a webpage with interactive maps, and photos of each waterfall?
+
+Read cache from MySQL

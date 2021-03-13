@@ -7,11 +7,17 @@ import (
 	"os"
 )
 
+type mapboxDetails struct {
+	uname  string
+	style  string
+	apikey string
+}
+
 // MapboxStatic creates a static image of a map
 // with markers represented by m
-func MapboxStatic(m Markers, fname string) error {
+func MapboxStatic(m Markers, fname string, mbox mapboxDetails) error {
 	baseURL := "https://api.mapbox.com/"
-	query := "styles/v1/phoebos/ckm5olymje9lp17qnq8108oro/static/"
+	query := fmt.Sprintf("styles/v1/%s/%s/static/", mbox.uname, mbox.style)
 	// it is possible to just use "auto" instead of a bbox for this next field
 	// (which defines the field of view)
 	// and then the overlays (markers) are used to fit the field of view.
@@ -19,7 +25,6 @@ func MapboxStatic(m Markers, fname string) error {
 	if *verbose {
 		fmt.Printf("Bounds for %s: %v\n", fname, formatBounds(m, 0.05))
 	}
-	api_key := "sk.eyJ1IjoicGhvZWJvcyIsImEiOiJja201b2o4ZHEwZzl6Mm5ud2o4bXd0NjhlIn0.lEiKI4kRVe0Ao4TConJfQQ"
 
 	var markersMapbox string
 
@@ -29,8 +34,8 @@ func MapboxStatic(m Markers, fname string) error {
 	// remove the final comma
 	markersMapbox = markersMapbox[:len(markersMapbox)-1]
 
-	imgP, err := http.Get(baseURL + query + markersMapbox + suffix + api_key)
-	//fmt.Printf("GET: %s\n", baseURL+query+markersMapbox+suffix+api_key)
+	imgP, err := http.Get(baseURL + query + markersMapbox + suffix + mbox.apikey)
+	//fmt.Printf("GET: %s\n", baseURL+query+markersMapbox+suffix+mbox.apikey)
 	if err != nil {
 		return err
 	}
