@@ -14,6 +14,11 @@ func saveMapboxHTML(fname, js string) error {
 
 	var html string = `<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
 <title>Map: plan for holiday</title>
+<!-- favicon source:
+Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
+https://github.com/twitter/twemoji/blob/master/assets/svg/1f9e1.svg
+License: CC-BY 4.0 -->
+<link rel="icon" href="favicon.ico" />
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet"> <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
 <style>
 	body {
@@ -64,6 +69,11 @@ func mapboxEmbeddedPage(fname, mapURL, content string) error {
 
 	var html string = ` <!DOCTYPE html><html><head><meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 <title>Plan for holiday</title>
+<!-- favicon source:
+Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
+https://github.com/twitter/twemoji/blob/master/assets/svg/1f9e1.svg
+License: CC-BY 4.0 -->
+<link rel="icon" href="favicon.ico" />
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet"> <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
 <style>
 	body{
