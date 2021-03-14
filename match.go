@@ -30,7 +30,8 @@ func usage() {
 		"\t\t\t[-sqluname username] [-sqlpwd password] [-sqldb myDB]\n\n", os.Args[0])
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, "\nholiday-plan is a program to get, save, or plot data about hostels and waterfalls in the UK.\n"+
-		"If a SQL username is provided, the SQL database is either written to using the obtained data, or read from, if use-cache is true.\n")
+		"If a SQL username is provided, the SQL database is either written to using the obtained data, or read from, if use-cache is true.\n"+
+		"If -mappage is given, the pages will be generated as docs/index.html and docs/map.html")
 }
 
 func main() {
@@ -42,7 +43,7 @@ func main() {
 	useCache := flag.Bool("use-cache", false, "use the cache rather than File/URL (requires the cache filename flags)")
 
 	staticImgs := flag.Bool("static", false, "generate static PNGs of maps with markers")
-	mbPageName := flag.String("mappage", "", "generate a webpage of the given name with an interactive map")
+	mbPage := flag.Bool("mappage", false, "generate webpages with an interactive map")
 	var mboxDs mapboxDetails
 	flag.StringVar(&mboxDs.uname, "mapboxuname", "", "mapbox.com username")
 	flag.StringVar(&mboxDs.style, "mapboxstyle", "", "style of mapbox map")
@@ -51,7 +52,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if (*staticImgs || *mbPageName != "") && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
+	if (*staticImgs || *mbPage) && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
 		log.Fatal("insufficient credentials provided to generate mapbox maps")
 	}
 
@@ -120,10 +121,19 @@ func main() {
 
 		fmt.Printf("Wrote maps to %s and %s.\n", hostelsImg, waterfallsImg)
 	}
-	if *mbPageName != "" {
+	if *mbPage {
+		// mappage is a fullscreen map; embeddedmappage embeds mappage in an iframe and can have other content too
+		pagesDir := "docs/"
+		mappage := "map.html"
+		embeddedmappage := "index.html"
+
 		js := mapboxMapJS(mboxDs, formatBounds(hostels, 0.1))
 		js = js + markerToJS(hostels, "#550000") + markerToJS(waterfalls, "#0055ff")
-		err = saveMapboxHTML(*mbPageName, js, "")
+		err = saveMapboxHTML(pagesDir+mappage, js)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = mapboxEmbeddedPage(pagesDir+embeddedmappage, mappage, "")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -152,6 +162,7 @@ func CSVtoMarkers(fname string) (Markers, error) {
 	if err != nil {
 		return Markers{}, err
 	}
+	defer f.Close()
 	r := csv.NewReader(f)
 	lines, err := r.ReadAll()
 	if err != nil {
@@ -474,6 +485,7 @@ func (m Markers) SaveCSV(filename string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer f.Close()
 
 	var bytesWritten int
 	for _, mark := range m.Markers {

@@ -1,309 +1,45 @@
-<!DOCTYPE html>
-	<html>
-	<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-	<title>Plan for holiday</title>
-	<link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet">
-	<script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
-	<style>
+ <!DOCTYPE html><html><head><meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<title>Plan for holiday</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet"> <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
+<style>
+	body{
+		margin:1em auto;
+		margin-top: 100px;
+		max-width: 40em;
+		line-height: 1.4;
+		font: 1.2em/1.62 sans-serif;
+		padding: 0 0.62em;
+		color: #444;
+		background: #eeeeee;
+	}
+	h1{
+		text-align: center;
+		line-height: 1.2;
+	}
+	h2,h4{
+		text-align:right;
+		line-height: 1.2;
+	}
+	@media(prefers-color-scheme:dark) {
 		body{
-			margin:1em auto;
-			margin-top: 100px;
-			max-width: 40em;
-			line-height: 1.4;
-			font: 1.2em/1.62 sans-serif;
-			padding: 0 0.62em;
-			color: #444;
+			background: #292929;
+			color: #fff;
+		}
+		a {
+			color: #6cf;
+		}
+	}
+	@media(prefers-color-scheme: light){
+		body{
 			background: #eeeeee;
+			color: #444;
 		}
-		#map {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			width: 100%;
-		}
-		h1{
-			text-align: center;
-			line-height: 1.2;
-		}
-		h2,h4{
-			text-align:right;
-			line-height: 1.2;
-		}
-		@media(prefers-color-scheme:dark) {
-			body{
-				background: #292929;
-				color: #fff;
-			}
-			a {
-				color: #6cf;
-			}
-		}
-		@media(prefers-color-scheme: light){
-			body{
-				background: #eeeeee;
-				color: #444;
-			}
-		}
-	</style>
-	</head>
-	<body>
-	<div id="map"></div>
-	
-	<script>
-	mapboxgl.accessToken = "apikey";
-var bbox = [-6.403442,48.575727,2.176976,56.421855];
-var map = new mapboxgl.Map({
-	container: 'map',
-	style:"ckm5olymje9lp17qnq8108oro",
-});
-map.fitBounds(bbox);
+	}
+</style>
+</head>
+<body>
+<iframe id="map" allowfullscreen="" src="map.html" height="500" width="500"></iframe>
 
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.798700,53.099043]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.770957,53.351139]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.791024,53.376148]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.672672,53.289222]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.658796,53.329896]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.804622,53.140123]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.772844,53.256286]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.067374,53.197656]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.371507,52.738278]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.000170,53.284560]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.686490,53.174997]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([1.461941,52.160675]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.135516,52.196688]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.488189,52.936991]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([1.212643,52.939587]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([1.083875,51.963318]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.853195,52.951649]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.806626,52.554822]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.895520,52.563080]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.025661,52.424954]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.923098,52.990125]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.010871,53.191745]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.805223,53.053087]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.488607,52.635508]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.450477,52.618843]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.024400,52.205325]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.736100,52.229900]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.671818,52.531842]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.548793,52.737864]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.663415,52.203665]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.594785,51.856629]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.142441,51.521335]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.189243,51.490384]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.022321,51.704035]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.136818,51.514819]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.126498,51.528809]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.100406,51.513109]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.046370,51.504370]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.706076,55.411739]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.252522,55.143627]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.004699,55.768011]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.107840,54.556990]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.372700,55.318100]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.574600,54.773200]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.973816,54.845396]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.579525,55.231858]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.218251,54.669200]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.189125,55.496771]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.357281,54.856792]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.388306,54.996081]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.015297,55.543716]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.441575,53.966417]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.441886,54.808934]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.961813,54.419170]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.841910,54.197938]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.244845,54.500346]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.150390,54.518760]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.271598,54.540418]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.945090,54.895728]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.367444,54.656128]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.095299,54.377599]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.075600,54.373310]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.484206,54.619877]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.326677,54.514804]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.241300,54.398900]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.024655,54.462200]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.994753,54.361697]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.981393,54.547756]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.197834,54.511433]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.135020,54.602104]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.021480,54.438570]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.986300,53.398000]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.257352,53.475618]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.930458,54.532633]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.106266,54.652016]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.319706,54.428558]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.917495,54.403862]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.152371,50.797274]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.534234,50.857352]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.165058,50.972822]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.395457,50.643555]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.687614,50.824380]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([1.091335,51.271692]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.250561,50.769104]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.420847,51.194147]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.592401,51.610057]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.545281,50.808272]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([1.364169,51.385120]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.558034,51.357857]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.789000,52.047950]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.266399,51.752897]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([0.034021,50.831591]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.148734,51.521815]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.367452,51.252025]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.006569,50.812445]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.541704,50.677089]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.262730,50.882035]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.996212,50.732191]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.640796,51.738112]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.340667,51.379157]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.101095,50.701500]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.695582,50.690740]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.818937,50.235406]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.597445,51.449822]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.781934,51.277688]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.701599,51.180234]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.096964,50.021776]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.901563,50.580648]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.520579,50.967488]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.500559,50.698466]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.640911,51.132639]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.075129,49.229571]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.688407,50.115914]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.640401,50.707703]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.203534,49.960124]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.240025,50.625090]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.470875,51.187860]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.001400,50.727270]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.557929,50.117926]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.161710,50.346100]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.827394,51.155158]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.135794,50.374115]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.446242,50.563974]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.270809,50.252762]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.783951,50.223036]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.722665,51.930670]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.743768,51.107921]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.957830,50.606150]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.764200,50.659850]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.022908,50.527642]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.239671,51.038784]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.020846,53.080876]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.650924,53.291967]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.845089,53.101990]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.051683,52.496522]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.350090,51.950526]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.099968,51.784466]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.028061,53.042442]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.176452,51.502993]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.838888,53.278562]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.297848,51.876570]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.747679,52.191029]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.210468,51.546104]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.020508,53.123287]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.950776,52.725661]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.132104,53.115312]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.778570,51.905790]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.140727,51.831097]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.493255,51.891676]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.776360,51.644801]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.218742,51.726955]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.830712,52.017354]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.710276,52.106396]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.209829,51.541374]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.072266,52.007073]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.274508,51.569640]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.879091,53.230980]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-4.143262,53.073296]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-5.286795,51.902160]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.999300,51.591200]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-3.828126,52.165525]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.422850,53.839690]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.531346,54.422785]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.700928,53.298809]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.130656,53.918079]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.927156,54.373774]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.203832,54.303579]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.942332,53.836840]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.057220,54.248285]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.467694,54.155057]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.046590,54.147330]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.595369,53.826281]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.609386,53.815434]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.564091,53.801095]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.596913,53.825371]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.704949,54.298660]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.152044,54.062513]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-2.061909,53.708477]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.291559,54.376449]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.424379,54.302293]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-0.608271,54.487423]).addTo(map);
-new mapboxgl.Marker({color: "#550000"}).setLngLat([-1.102822,53.968511]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.930905,54.576303]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.376500,54.758700]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-1.982222,54.293636]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.751111,50.607222]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.651500,50.629600]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.166667,54.401111]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.491667,54.372500]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.115600,54.415480]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.233333,54.317778]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.161720,54.406150]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-0.632750,54.419000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.382489,54.149560]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-4.641667,50.327778]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.130833,54.071944]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.202222,54.321111]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.341620,54.364430]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.187500,54.650278]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.909800,51.221600]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.471333,54.154333]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.136667,54.066111]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-1.867700,53.389500]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.157295,54.403986]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.137800,54.557600]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.151389,54.646944]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-0.732300,54.397600]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.248800,54.545800]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.471333,54.154333]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-1.734254,54.401025]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.258000,54.471900]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.313500,54.543200]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.115600,54.415480]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.190810,54.488070]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-0.602778,51.411111]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.471333,54.154333]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-2.181760,54.408820]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-4.719200,50.664800]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.994964,53.210539]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-4.523800,52.045700]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.779100,53.065200]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.991500,52.619500]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.662400,52.534200]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.810000,53.133200]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.663300,51.794300]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.199167,52.981111]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.700800,51.701400]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.850000,52.377000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.880900,52.830300]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.838422,52.531370]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.378539,52.854992]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-4.710000,52.808000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.944960,52.975620]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.502778,51.859722]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.590000,51.750000]).addTo(map);
-new mapboxgl.Marker({color: "#0055ff"}).setLngLat([-3.846800,53.102400]).addTo(map);
 
-	</script>
-	</body>
-	</html>
+</body>
+</html>
