@@ -1,8 +1,6 @@
 // finds hostels and waterfalls in the UK which are close to each other.
 package main
 
-// BUG(): Markers.FindRanges() doesn't seem to work for the waterfall data.
-
 import (
 	"encoding/csv"
 	"encoding/xml"
@@ -433,11 +431,11 @@ func (m Markers) FindRanges(lat bool, max bool) int {
 	if lat {
 		maxValue = m.Markers[0].Lat
 	} else {
-		maxValue = m.Markers[1].Long
+		maxValue = m.Markers[0].Long
 	}
 	var maxIndex int = 0
 	var curValue float64 = 0.0
-	for i := range m.Markers[1:] {
+	for i := range m.Markers {
 		if lat {
 			curValue = m.Markers[i].Lat
 		} else {

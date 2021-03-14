@@ -8,3 +8,7 @@ and Scottish waterfalls are ignored by the scraper.
 Make a webpage with interactive maps, and photos of each waterfall?
 
 Read cache from MySQL
+
+Crawl wiki pages concurrently
+
+Use wikipedia api to find coordinates from json
