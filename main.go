@@ -139,6 +139,13 @@ func main() {
 		}
 	}
 
+	matched := matchClosest(waterfalls, hostels)
+	for h, ws := range matched {
+		if len(ws) > 0 {
+			fmt.Printf("%s: %q\n", h, ws)
+		}
+	}
+
 }
 
 // longestName returns the index and length of the longest Name in a Markers.
