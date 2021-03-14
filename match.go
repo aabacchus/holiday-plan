@@ -25,7 +25,8 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "usage: %s\t[-v] [-h]\n"+
 		"\t\t\t[-hostelFile hostels.xml] [-waterfallsURL https://en.wikipedia.org/wiki/List...]\n"+
 		"\t\t\t[-use-cache] [-hostelCache hostels_cache.csv] [-waterfallCache waterfalls_cache.csv]\n"+
-		"\t\t\t[-static]\n"+
+		"\t\t\t[-static] [-mappage]\n"+
+		"\t\t\t ↳ [-mapboxuname] [-mapboxapi] [-mapboxstyle]\n"+
 		"\t\t\t[-sqluname username] [-sqlpwd password] [-sqldb myDB]\n\n", os.Args[0])
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, "\nholiday-plan is a program to get, save, or plot data about hostels and waterfalls in the UK.\n"+
@@ -41,6 +42,7 @@ func main() {
 	useCache := flag.Bool("use-cache", false, "use the cache rather than File/URL (requires the cache filename flags)")
 
 	staticImgs := flag.Bool("static", false, "generate static PNGs of maps with markers")
+	mbPageName := flag.String("mappage", "", "generate a webpage of the given name with an interactive map")
 	var mboxDs mapboxDetails
 	flag.StringVar(&mboxDs.uname, "mapboxuname", "", "mapbox.com username")
 	flag.StringVar(&mboxDs.style, "mapboxstyle", "", "style of mapbox map")
@@ -49,7 +51,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if *staticImgs && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
+	if (*staticImgs || *mbPageName != "") && (mboxDs.uname == "" || mboxDs.style == "" || mboxDs.apikey == "") {
 		log.Fatal("insufficient credentials provided to generate mapbox maps")
 	}
 
@@ -117,6 +119,14 @@ func main() {
 		}
 
 		fmt.Printf("Wrote maps to %s and %s.\n", hostelsImg, waterfallsImg)
+	}
+	if *mbPageName != "" {
+		js := mapboxMapJS(mboxDs, formatBounds(hostels, 0.1))
+		js = js + markerToJS(hostels, "#550000") + markerToJS(waterfalls, "#0055ff")
+		err = saveMapboxHTML(*mbPageName, js, "")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
