@@ -1,3 +1,8 @@
+/* Copyright 2021 Ben Fuller
+ * Apache License, Version 2.0
+ * See LICENCE file for copyright and licence details.
+ */
+
 package main
 
 import (
@@ -16,6 +21,13 @@ func saveMapboxHTML(fname, js string) error {
 
 	var html string = `<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
 <title>Map: plan for holiday</title>
+<!--
+This work by Ben Fuller is licensed under CC-BY-SA 4.0:
+http://creativecommons.org/licenses/by-sa/4.0/
+-->
+<!-- data source for markers are the Wikipedia articles
+"List of Waterfalls of the United Kingdom" and "List of Youth Hostels in England and Wales"
+which are licensed under CC-BY-SA 3.0. -->
 <!-- favicon source:
 Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
 https://github.com/twitter/twemoji/blob/master/assets/svg/1f9e1.svg
@@ -73,6 +85,9 @@ func mapboxEmbeddedPage(fname, mapURL, content string) error {
 
 	var html string = ` <!DOCTYPE html><html><head><meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 <title>Plan for holiday</title>
+<!-- data sources for table are the Wikipedia articles
+"List of Waterfalls of the United Kingdom" and "List of Youth Hostels in England and Wales"
+which are licensed under CC-BY-SA 3.0. -->
 <!-- favicon source:
 Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
 https://github.com/twitter/twemoji/blob/master/assets/svg/1f9e1.svg
@@ -107,6 +122,17 @@ License: CC-BY 4.0 -->
 	th, td {
 		padding: 15px;
 	}
+	footer {
+		font-size: 0.6em;
+		padding: 5px;
+		border-top: 1px solid black;
+	}
+	.right {
+		float: right;
+	}
+	.left {
+		float: left;
+	}
 	@media(prefers-color-scheme:dark) {
 		body{
 			background: #292929;
@@ -131,11 +157,23 @@ License: CC-BY 4.0 -->
 </style>
 </head>
 <body>
+<a id="top"></a>
 <h1>Map of Waterfalls in the UK</h1>
 <h2>And hostels close to them</h2>
 <iframe id="map" allowfullscreen="" src=` + fmt.Sprintf("%q", mapURL) + ` height="500" width="500"></iframe>
 ` + content + `
 
+<br>
+<footer>
+<div class="left" id="license">
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons BY-SA 4.0 Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+<br />
+Copyright © Ben Fuller, 2021
+<br>
+<br>
+</div>
+<div class="right"><a href="#top">↑ Back to top</a></div>
+</footer>
 </body>
 </html>
 `

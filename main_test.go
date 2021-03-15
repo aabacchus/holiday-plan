@@ -1,3 +1,8 @@
+/* Copyright 2021 Ben Fuller
+ * Apache License, Version 2.0
+ * See LICENCE file for copyright and licence details.
+ */
+
 package main
 
 import "testing"
