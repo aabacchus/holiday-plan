@@ -133,16 +133,18 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = mapboxEmbeddedPage(pagesDir+embeddedmappage, mappage, "")
+
+		// get hostel:waterfalls pairs matched to put in a table
+		matched := matchClosest(waterfalls, hostels)
+		for h, ws := range matched {
+			if len(ws) > 0 {
+				fmt.Printf("%s: %q\n", h, ws)
+			}
+		}
+		table := mapToTable(matched, "Hostel", "Closest Waterfalls")
+		err = mapboxEmbeddedPage(pagesDir+embeddedmappage, mappage, table)
 		if err != nil {
 			log.Fatal(err)
-		}
-	}
-
-	matched := matchClosest(waterfalls, hostels)
-	for h, ws := range matched {
-		if len(ws) > 0 {
-			fmt.Printf("%s: %q\n", h, ws)
 		}
 	}
 

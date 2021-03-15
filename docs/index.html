@@ -27,9 +27,19 @@ License: CC-BY 4.0 -->
 		text-align:right;
 		line-height: 1.2;
 	}
+	table, th, td {
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	th, td {
+		padding: 15px;
+	}
 	@media(prefers-color-scheme:dark) {
 		body{
 			background: #292929;
+			color: #fff;
+		}
+		table, th, td {
 			color: #fff;
 		}
 		a {
@@ -41,12 +51,49 @@ License: CC-BY 4.0 -->
 			background: #eeeeee;
 			color: #444;
 		}
+		table, th, td {
+			color: #444;
+		}
 	}
 </style>
 </head>
 <body>
+<h1>Map of Waterfalls in the UK</h1>
+<h2>And hostels close to them</h2>
 <iframe id="map" allowfullscreen="" src="map.html" height="500" width="500"></iframe>
-
+<table id="table">
+<tr><th>Hostel</th><th>Closest Waterfalls</th></tr>
+<tr><td>Alston</td><td>Ashgill Force</td></tr>
+<tr><td>Betws-y-Coed</td><td>Conwy Falls<br>Grey Mare's Tail, Llanrwst<br>Horseshoe Falls, Wales<br>Swallow Falls</td></tr>
+<tr><td>Black Sail</td><td>Ritson's Force</td></tr>
+<tr><td>Boggle Hole</td><td>Falling Foss</td></tr>
+<tr><td>Borrowdale</td><td>Lodore Falls</td></tr>
+<tr><td>Borth</td><td>Ffrwd Fawr Waterfall<br>Mynach Falls<br>Pistyll y Llyn</td></tr>
+<tr><td>Boswinger</td><td>Golitha Falls</td></tr>
+<tr><td>Bryn Gwynant</td><td>Rhaeadr Cynfal</td></tr>
+<tr><td>Buttermere</td><td>Moss Force<br>Scale Force</td></tr>
+<tr><td>Coniston Coppermines</td><td>River Brathay<br>River Brathay</td></tr>
+<tr><td>Dartmoor</td><td>Becky Falls</td></tr>
+<tr><td>Edale</td><td>Kinder Downfall</td></tr>
+<tr><td>Exeter</td><td>Canonteign Falls</td></tr>
+<tr><td>Grinton Lodge</td><td>Aysgarth Falls<br>Richmond Falls</td></tr>
+<tr><td>Hawes</td><td>Catrake Force<br>Cautley Spout<br>Cotter Force<br>East Gill Force<br>Hardraw Force<br>Aisgill<br>Kisdon Force<br>Wain Wath Force</td></tr>
+<tr><td>Helvellyn</td><td>Aira Force</td></tr>
+<tr><td>Honister Hause</td><td>Taylorgill Force</td></tr>
+<tr><td>Ingleton</td><td>Gaping Gill<br>Ingleton Falls<br>Pecca Falls<br>Ingleton Waterfalls Trail</td></tr>
+<tr><td>Jordans</td><td>Virginia Water Lake</td></tr>
+<tr><td>Kings</td><td>Dolgoch Falls<br>Pistyll Cain<br>Pistyll Rhaeadr</td></tr>
+<tr><td>Langdon Beck</td><td>High Force<br>Low Force</td></tr>
+<tr><td>Llanddeusant</td><td>Sgwd Henrhyd<br>Melincourt Falls</td></tr>
+<tr><td>Llwyn-y-Celyn</td><td>Sgwd Clun-gwyn<br>Sgwd Ddwli Isaf<br>Sgwd Ddwli Uchaf<br>Sgwd Isaf Clun-gwyn<br>Sgwd Einion Gam<br>Sgwd Gwladus<br>Sgwd y Bedol<br>Sgwd yr Eira<br>Sgwd y Pannwr</td></tr>
+<tr><td>Lockton</td><td>Mallyan Spout</td></tr>
+<tr><td>Malham</td><td>Gordale Scar<br>Janet's Foss</td></tr>
+<tr><td>Pinkery</td><td>Hollowbrook Waterfall</td></tr>
+<tr><td>Poppit Sands</td><td>Cenarth Falls</td></tr>
+<tr><td>Rowen</td><td>Aber Falls</td></tr>
+<tr><td>Snowdon Ranger</td><td>Pistyll y Gaseg</td></tr>
+<tr><td>Tintagel</td><td>St Nectan's Glen</td></tr>
+</table>
 
 </body>
 </html>

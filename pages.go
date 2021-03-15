@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 )
 
 func saveMapboxHTML(fname, js string) error {
@@ -98,9 +100,19 @@ License: CC-BY 4.0 -->
 		text-align:right;
 		line-height: 1.2;
 	}
+	table, th, td {
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	th, td {
+		padding: 15px;
+	}
 	@media(prefers-color-scheme:dark) {
 		body{
 			background: #292929;
+			color: #fff;
+		}
+		table, th, td {
 			color: #fff;
 		}
 		a {
@@ -112,10 +124,15 @@ License: CC-BY 4.0 -->
 			background: #eeeeee;
 			color: #444;
 		}
+		table, th, td {
+			color: #444;
+		}
 	}
 </style>
 </head>
 <body>
+<h1>Map of Waterfalls in the UK</h1>
+<h2>And hostels close to them</h2>
 <iframe id="map" allowfullscreen="" src=` + fmt.Sprintf("%q", mapURL) + ` height="500" width="500"></iframe>
 ` + content + `
 
@@ -125,6 +142,28 @@ License: CC-BY 4.0 -->
 
 	_, err = f.Write([]byte(html))
 	return err
+}
+
+// mapToTable takes a map[string][]string and turns it into a html table
+// sorted by the key.
+// headers must have two elements; one to head the keys and one the values.
+func mapToTable(m map[string][]string, headers ...interface{}) string {
+	// sort the keys
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var tableBody string
+	for _, k := range keys {
+		if len(m[k]) == 0 {
+			continue
+		}
+		tableBody += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", k, strings.Join(m[k], "<br>"))
+	}
+
+	return fmt.Sprintf("<table id=\"table\">\n<tr><th>%s</th><th>%s</th></tr>\n", headers...) + tableBody + "</table>"
 }
 
 // assumes a map variable called map in the rest of the js
