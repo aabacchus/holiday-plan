@@ -160,7 +160,19 @@ License: CC-BY 4.0 -->
 <a id="top"></a>
 <h1>Map of Waterfalls in the UK</h1>
 <h2>And hostels close to them</h2>
-<iframe id="map" allowfullscreen="" src=` + fmt.Sprintf("%q", mapURL) + ` height="500" width="500"></iframe>
+<p>
+The map below shows waterfalls with blue markers and hostels with brown markers.
+
+All the YHA hostels in England and Wales are shown, but the hostels which are closest to a waterfall are larger.
+
+Click on any marker to show its name, and a link for the hostels.
+
+Underneath there is a table showing for each waterfall which hostel is nearest, again with links to YHA hostel pages.
+</p>
+<center>
+<iframe name="map" id="map" allowfullscreen="" src=` + fmt.Sprintf("%q", mapURL) + ` height="500" width="500" style="max-width:100%;"></iframe>
+</center>
+<p>You can see a fullscreen version of this map <a href=` + fmt.Sprintf("%q", mapURL) + `>here</a>.</p>
 ` + content + `
 
 <br>
