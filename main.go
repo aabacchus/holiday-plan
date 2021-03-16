@@ -163,7 +163,7 @@ func main() {
 		}
 
 		js := mapboxMapJS(mboxDs, formatBounds(hostels, 0.1))
-		js = js + markerToJS(hostels, "#550000") + markerToJS(waterfalls, "#0055ff")
+		js = js + markerToJS(hostels, "#550000", "https://www.yha.org.uk/hostel/") + markerToJS(waterfalls, "#0055ff", "https://en.wikipedia.org/wiki/")
 		err = saveMapboxHTML(pagesDir+mappage, js)
 		if err != nil {
 			log.Fatal(err)

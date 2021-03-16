@@ -122,6 +122,10 @@ License: CC-BY 4.0 -->
 	th, td {
 		padding: 15px;
 	}
+	table a {
+		text-decoration: none;
+		color: inherit;
+	}
 	footer {
 		font-size: 0.6em;
 		padding: 5px;
@@ -165,7 +169,7 @@ The map below shows waterfalls with blue markers and hostels with brown markers.
 
 All the YHA hostels in England and Wales are shown, but the hostels which are closest to a waterfall are larger.
 
-Click on any marker to show its name, and a link for the hostels.
+Click on any marker to show its name and a link.
 
 Underneath there is a table showing for each waterfall which hostel is nearest, again with links to YHA hostel pages.
 </p>
@@ -210,19 +214,48 @@ func mapToTable(m map[string][]string, headers ...interface{}) string {
 		if len(m[k]) == 0 {
 			continue
 		}
-		tableBody += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", k, strings.Join(m[k], "<br>"))
+		// this bit making the link is a bit rough and some place names won't work
+		// but it's easier to manually fix broken links later in the html
+		linkslice := strings.Split(k, " ")
+		if len(linkslice) > 3 {
+			linkslice = linkslice[:2]
+		}
+		link := strings.Join(linkslice, "-")
+		// remove commas and apostrophes
+		link = strings.ReplaceAll(link, ",", "")
+		link = strings.ReplaceAll(link, "'", "")
+		waterfallsLinks := []string{}
+		for _, w := range m[k] {
+			waterfallsLinks = append(waterfallsLinks, "<a href=\"https://en.wikipedia.org/wiki/"+strings.ReplaceAll(w, " ", "_")+"\">"+w+"</a>")
+		}
+		tableBody += fmt.Sprintf("<tr><td><a href=\"https://www.yha.org.uk/hostel/%s\">%s</a></td><td>%s</td></tr>\n", link, k, strings.Join(waterfallsLinks, "<br>"))
 	}
 
 	return fmt.Sprintf("<table id=\"table\">\n<tr><th>%s</th><th>%s</th></tr>\n", headers...) + tableBody + "</table>"
 }
 
 // assumes a map variable called map in the rest of the js
-func markerToJS(m Markers, color string) string {
+func markerToJS(m Markers, color, linkPrefix string) string {
 	var js string
-	markerTemplate := "new mapboxgl.Marker({color: %q, scale: %f}).setLngLat([%f,%f]).setPopup(new mapboxgl.Popup({offset: 25}).setText(%q)).addTo(map);\n"
+	markerTemplate := "new mapboxgl.Marker({color: %q, scale: %f}).setLngLat([%f,%f]).setPopup(new mapboxgl.Popup({offset: 25}).setHTML(\"<a href='%s%s'>%s</a>\")).addTo(map);\n"
 
 	for _, mark := range m.Markers {
-		js = js + fmt.Sprintf(markerTemplate, color, mark.scale, mark.Long, mark.Lat, mark.Name)
+		// this bit making the link is a bit rough and some place names won't work
+		// but it's easier to manually fix broken links later in the html
+		var link string
+		if strings.Contains(linkPrefix, "yha") {
+			linkslice := strings.Split(mark.Name, " ")
+			if len(linkslice) > 3 {
+				linkslice = linkslice[:2]
+			}
+			link = strings.Join(linkslice, "-")
+			// remove commas and apostrophes
+			link = strings.ReplaceAll(link, ",", "")
+			link = strings.ReplaceAll(link, "'", "")
+		} else if strings.Contains(linkPrefix, "wiki") {
+			link = strings.ReplaceAll(mark.Name, " ", "_")
+		}
+		js = js + fmt.Sprintf(markerTemplate, color, mark.scale, mark.Long, mark.Lat, linkPrefix, link, mark.Name)
 	}
 
 	return js
