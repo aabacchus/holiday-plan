@@ -219,10 +219,10 @@ func mapToTable(m map[string][]string, headers ...interface{}) string {
 // assumes a map variable called map in the rest of the js
 func markerToJS(m Markers, color string) string {
 	var js string
-	markerTemplate := "new mapboxgl.Marker({color: %q}).setLngLat([%f,%f]).addTo(map);\n"
+	markerTemplate := "new mapboxgl.Marker({color: %q, scale: %f}).setLngLat([%f,%f]).addTo(map);\n"
 
 	for _, mark := range m.Markers {
-		js = js + fmt.Sprintf(markerTemplate, color, mark.Long, mark.Lat)
+		js = js + fmt.Sprintf(markerTemplate, color, mark.scale, mark.Long, mark.Lat)
 	}
 
 	return js

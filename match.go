@@ -19,6 +19,12 @@ func matchClosest(childs, nodes Markers) map[string][]string {
 		closestNode := nodes.sortClosest(child).Name
 		matched[closestNode] = append(matched[closestNode], child.Name)
 	}
+	// now delete all the entries which weren't filled
+	for key := range matched {
+		if len(matched[key]) == 0 {
+			delete(matched, key)
+		}
+	}
 	return matched
 }
 

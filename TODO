@@ -1,9 +1,10 @@
 hostels.xml is only England and Wales (YHA);
 and Scottish waterfalls are ignored by the scraper.
 
-Make a webpage with interactive maps, and photos of each waterfall?
+add photos of each waterfall to webpage?
 add popups with the name of each marker to interactive map
-add table of hostel-watefalls pairs to embedded page
+add controls for map to add/remove markers
+add links to YHA hostel page for each hostel
 
 Read cache from MySQL
 

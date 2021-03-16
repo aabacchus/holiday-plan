@@ -142,6 +142,26 @@ func main() {
 		mappage := "map.html"
 		embeddedmappage := "index.html"
 
+		// get hostel:waterfalls pairs matched to put in a table
+		matched := matchClosest(waterfalls, hostels)
+		// very hacky, sets all the hostels to be small
+		// then sets the ones closest to waterfalls to be normal size
+		for i := range hostels.Markers {
+			hostels.Markers[i].scale = 0.4
+		}
+		for h := range matched {
+			for i, hostel := range hostels.Markers {
+				if hostel.Name == h {
+					hostels.Markers[i].scale = 1.0
+				}
+			}
+		}
+
+		// similarly set all the waterfalls to have scale 1
+		for i := range waterfalls.Markers {
+			waterfalls.Markers[i].scale = 1.0
+		}
+
 		js := mapboxMapJS(mboxDs, formatBounds(hostels, 0.1))
 		js = js + markerToJS(hostels, "#550000") + markerToJS(waterfalls, "#0055ff")
 		err = saveMapboxHTML(pagesDir+mappage, js)
@@ -149,13 +169,6 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// get hostel:waterfalls pairs matched to put in a table
-		matched := matchClosest(waterfalls, hostels)
-		for h, ws := range matched {
-			if len(ws) > 0 {
-				fmt.Printf("%s: %q\n", h, ws)
-			}
-		}
 		table := mapToTable(matched, "Hostel", "Closest Waterfalls")
 		err = mapboxEmbeddedPage(pagesDir+embeddedmappage, mappage, table)
 		if err != nil {
@@ -460,9 +473,10 @@ type Markers struct {
 
 // Marker is a basic point with a name and a location expressed in decimal coordinates
 type Marker struct {
-	Name string
-	Lat  float64
-	Long float64
+	Name  string
+	Lat   float64
+	Long  float64
+	scale float64
 }
 
 // FindRanges returns the index of the Marker with the largest or smallest
