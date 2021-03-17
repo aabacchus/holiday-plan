@@ -54,6 +54,7 @@ func MapboxStatic(m Markers, fname string, mbox mapboxDetails) error {
 // formatBounds makes a bbox given a Markers
 // in the order min(long), min(lat), max(long), max(lat)
 // with optional spacing as a fraction of the width/height.
+// the spacing can be negative to zoom in.
 func formatBounds(m Markers, space float64) string {
 	left := m.Markers[m.FindRanges(false, false)].Long
 	bot := m.Markers[m.FindRanges(true, false)].Lat

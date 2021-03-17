@@ -55,6 +55,7 @@ func main() {
 	verbose = flag.Bool("v", false, "print verbose output to stderr")
 	hostelSave := flag.String("hostelCache", "hostels_cache.csv", "saves hostel data to the file")
 	waterfallSave := flag.String("waterfallCache", "waterfalls_cache.csv", "saves waterfall data to the file")
+	scotlandSave := flag.String("scotlandCache", "scotlands_cache.csv", "saves scottish waterfall data to the file")
 	useCache := flag.Bool("use-cache", false, "use the cache rather than File/URL (requires the cache filename flags)")
 
 	staticImgs := flag.Bool("static", false, "generate static PNGs of maps with markers")
@@ -71,7 +72,7 @@ func main() {
 		log.Fatal("insufficient credentials provided to generate mapbox maps")
 	}
 
-	var hostels, waterfalls Markers
+	var hostels, waterfalls, scotlands Markers
 	var err error
 
 	if *useCache {
@@ -79,6 +80,9 @@ func main() {
 			log.Fatal("Please provide the filename of the waterfall cache")
 		}
 		if *hostelSave == "" {
+			log.Fatal("Please provide the filename of the hostel cache")
+		}
+		if *scotlandSave == "" {
 			log.Fatal("Please provide the filename of the hostel cache")
 		}
 		hostels, err = CSVtoMarkers(*hostelSave)
@@ -89,11 +93,20 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		scotlands, err = CSVtoMarkers(*scotlandSave)
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
 		hostels = KMLGetLocations(*hostelFile)
 		fmt.Fprintf(os.Stderr, "Crawling waterfalls list webpage...\n")
 		waterfalls = crawlWiki(*waterURL)
+		fmt.Fprintf(os.Stderr, "Parsing list of Scottish waterfalls...\n")
+		scotlands, err = wikiScotlandParse()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// save cached data to file
 		n, err := hostels.SaveCSV(*hostelSave)
@@ -108,18 +121,14 @@ func main() {
 		} else {
 			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *waterfallSave)
 		}
-	}
-	// not sure how useful this is
-	if *verbose {
-		for _, m := range hostels.Markers {
-			fmt.Printf("%v\n", m)
-		}
-		fmt.Println()
-		for _, m := range waterfalls.Markers {
-			fmt.Printf("%v\n", m)
+		n, err = scotlands.SaveCSV(*scotlandSave)
+		if err != nil {
+			log.Println(err)
+		} else {
+			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *scotlandSave)
 		}
 	}
-	fmt.Fprintf(os.Stderr, "Got %v hostels, %v waterfalls\n", len(hostels.Markers), len(waterfalls.Markers))
+	fmt.Fprintf(os.Stderr, "Got %v hostels, %v waterfalls (and %v in Scotland)\n", len(hostels.Markers), len(waterfalls.Markers), len(scotlands.Markers))
 
 	if *staticImgs {
 		hostelsImg := "map-hostels-" + time.Now().Format("2006-01-02-1504") + ".png"
@@ -129,7 +138,7 @@ func main() {
 		}
 
 		waterfallsImg := "map-waterfalls-" + time.Now().Format("2006-01-02-1504") + ".png"
-		err = MapboxStatic(waterfalls, waterfallsImg, mboxDs)
+		err = MapboxStatic(Markers{Markers: append(waterfalls.Markers, scotlands.Markers...)}, waterfallsImg, mboxDs)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -147,23 +156,27 @@ func main() {
 		// very hacky, sets all the hostels to be small
 		// then sets the ones closest to waterfalls to be normal size
 		for i := range hostels.Markers {
-			hostels.Markers[i].scale = 0.4
+			hostels.Markers[i].scale = 0.3
 		}
 		for h := range matched {
 			for i, hostel := range hostels.Markers {
 				if hostel.Name == h {
-					hostels.Markers[i].scale = 1.0
+					hostels.Markers[i].scale = 0.8
 				}
 			}
 		}
 
-		// similarly set all the waterfalls to have scale 1
+		// similarly set all the waterfalls scale
 		for i := range waterfalls.Markers {
-			waterfalls.Markers[i].scale = 1.0
+			waterfalls.Markers[i].scale = 0.8
+		}
+		for i := range scotlands.Markers {
+			scotlands.Markers[i].scale = 0.4
 		}
 
-		js := mapboxMapJS(mboxDs, formatBounds(hostels, 0.1))
-		js = js + markerToJS(hostels, "#550000", "https://www.yha.org.uk/hostel/") + markerToJS(waterfalls, "#0055ff", "https://en.wikipedia.org/wiki/")
+		js := mapboxMapJS(mboxDs, formatBounds(Markers{Markers: append(hostels.Markers, scotlands.Markers...)}, -0.05))
+		js = js + markerToJS(hostels, "#550000", "https://www.yha.org.uk/hostel/") + markerToJS(waterfalls, "#0044ff", "https://en.wikipedia.org/wiki/") + markerToJS(scotlands, "#0055ff", "https://en.wikipedia.org/wiki/")
+
 		err = saveMapboxHTML(pagesDir+mappage, js)
 		if err != nil {
 			log.Fatal(err)

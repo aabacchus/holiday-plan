@@ -165,9 +165,10 @@ License: CC-BY 4.0 -->
 <h1>Map of Waterfalls in the UK</h1>
 <h2>And hostels close to them</h2>
 <p>
-The map below shows waterfalls with blue markers and hostels with brown markers.
+The map below shows waterfalls with blue markers and hostels with brown markers. Markers for waterfalls in Scotland are smaller and slightly lighter so they can be more easily seen.
 
-All the YHA hostels in England and Wales are shown, but the hostels which are closest to a waterfall are larger.
+All the YHA hostels in England and Wales are shown, and the hostels which are closest to a waterfall are larger.
+Note that none of the hostels in Scotland are shown (yet).
 
 Click on any marker to show its name and a link.
 
