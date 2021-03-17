@@ -54,6 +54,7 @@ var map = new mapboxgl.Map({
 	style:"mapbox://styles/mapbox/outdoors-v11",
 });
 map.fitBounds(bbox);
+map.addControl(new mapboxgl.NavigationControl());
 
 var layerList = document.getElementById('menu');
 var inputs = layerList.getElementsByTagName('input');

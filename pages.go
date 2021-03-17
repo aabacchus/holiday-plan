@@ -282,6 +282,7 @@ var map = new mapboxgl.Map({
 	style:` + fmt.Sprintf("%q", mbox.style) + `,
 });
 map.fitBounds(bbox);
+map.addControl(new mapboxgl.NavigationControl());
 
 var layerList = document.getElementById('menu');
 var inputs = layerList.getElementsByTagName('input');
