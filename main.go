@@ -56,6 +56,7 @@ func main() {
 	hostelSave := flag.String("hostelCache", "hostels_cache.csv", "saves hostel data to the file")
 	waterfallSave := flag.String("waterfallCache", "waterfalls_cache.csv", "saves waterfall data to the file")
 	scotlandSave := flag.String("scotlandCache", "scotlands_cache.csv", "saves scottish waterfall data to the file")
+	scotHostelSave := flag.String("scotHostelCache", "scothostels_cache.csv", "saves scottish hostel data to the file")
 	useCache := flag.Bool("use-cache", false, "use the cache rather than File/URL (requires the cache filename flags)")
 
 	staticImgs := flag.Bool("static", false, "generate static PNGs of maps with markers")
@@ -72,7 +73,7 @@ func main() {
 		log.Fatal("insufficient credentials provided to generate mapbox maps")
 	}
 
-	var hostels, waterfalls, scotlands Markers
+	var hostels, waterfalls, scotlands, scotHostels Markers
 	var err error
 
 	if *useCache {
@@ -83,7 +84,10 @@ func main() {
 			log.Fatal("Please provide the filename of the hostel cache")
 		}
 		if *scotlandSave == "" {
-			log.Fatal("Please provide the filename of the hostel cache")
+			log.Fatal("Please provide the filename of the scottish waterfall cache")
+		}
+		if *scotHostelSave == "" {
+			log.Fatal("Please provide the filename of the scottish hostel cache")
 		}
 		hostels, err = CSVtoMarkers(*hostelSave)
 		if err != nil {
@@ -97,6 +101,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		scotHostels, err = CSVtoMarkers(*scotHostelSave)
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		fmt.Fprintf(os.Stderr, "Reading hostels XML...\n")
 		hostels = KMLGetLocations(*hostelFile)
@@ -104,6 +112,11 @@ func main() {
 		waterfalls = crawlWiki(*waterURL)
 		fmt.Fprintf(os.Stderr, "Parsing list of Scottish waterfalls...\n")
 		scotlands, err = wikiScotlandParse()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(os.Stderr, "Getting Scottish hostels JSON...\n")
+		scotHostels, err = scottishHostels("https://www.visitscotland.com/tms-api/v1/origins?active=1")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -127,12 +140,18 @@ func main() {
 		} else {
 			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *scotlandSave)
 		}
+		n, err = scotHostels.SaveCSV(*scotHostelSave)
+		if err != nil {
+			log.Println(err)
+		} else {
+			fmt.Fprintf(os.Stderr, "saved %d bytes to %s\n", n, *scotHostelSave)
+		}
 	}
-	fmt.Fprintf(os.Stderr, "Got %v hostels, %v waterfalls (and %v in Scotland)\n", len(hostels.Markers), len(waterfalls.Markers), len(scotlands.Markers))
+	fmt.Fprintf(os.Stderr, "Got %v hostels (and %v in Scotland), %v waterfalls (and %v in Scotland)\n", len(hostels.Markers), len(scotHostels.Markers), len(waterfalls.Markers), len(scotlands.Markers))
 
 	if *staticImgs {
 		hostelsImg := "map-hostels-" + time.Now().Format("2006-01-02-1504") + ".png"
-		err = MapboxStatic(hostels, hostelsImg, mboxDs)
+		err = MapboxStatic(Markers{Markers: append(hostels.Markers, scotHostels.Markers...)}, hostelsImg, mboxDs)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -165,6 +184,11 @@ func main() {
 				}
 			}
 		}
+		// don't bother matching the scottish ones -
+		// scotHostels also contains some outside of the UK which messes it up
+		for i := range scotHostels.Markers {
+			scotHostels.Markers[i].scale = 0.3
+		}
 
 		// similarly set all the waterfalls scale
 		for i := range waterfalls.Markers {
@@ -175,7 +199,7 @@ func main() {
 		}
 
 		js := mapboxMapJS(mboxDs, formatBounds(Markers{Markers: append(hostels.Markers, scotlands.Markers...)}, -0.05))
-		js = js + markerToJS(hostels, "#550000", "https://www.yha.org.uk/hostel/") + markerToJS(waterfalls, "#0044ff", "https://en.wikipedia.org/wiki/") + markerToJS(scotlands, "#0055ff", "https://en.wikipedia.org/wiki/")
+		js = js + markerToJS(hostels, "#550000", "https://www.yha.org.uk/hostel/") + markerToJS(scotHostels, "#550000", "") + markerToJS(waterfalls, "#0044ff", "https://en.wikipedia.org/wiki/") + markerToJS(scotlands, "#0055ff", "https://en.wikipedia.org/wiki/")
 
 		err = saveMapboxHTML(pagesDir+mappage, js)
 		if err != nil {

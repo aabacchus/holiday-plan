@@ -1,12 +1,57 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/the42/cartconvert/cartconvert/osgb36"
 )
+
+// jsonToMarkers takes json input and returns all the location infos with a location.
+func jsonToMarkers(jsons []byte) (Markers, error) {
+	var out struct{ Data []hostelJSONPlace }
+	err := json.Unmarshal(jsons, &out)
+	var hostels Markers
+	for _, p := range out.Data {
+		var lat, long float64
+		if p.Lat == "" || p.Lng == "" {
+			continue
+		}
+		lat, err = strconv.ParseFloat(p.Lat, 64)
+		long, _ = strconv.ParseFloat(p.Lng, 64)
+		if err != nil {
+			return hostels, err
+		}
+		hostels.Markers = append(hostels.Markers, Marker{
+			Name: p.Name,
+			Lat:  lat,
+			Long: long,
+		})
+	}
+	return hostels, err
+}
+
+type hostelJSONPlace struct {
+	Name string `json:"name"`
+	Lat  string `json:"lat"`
+	Lng  string `json:"lng"`
+}
+
+func scottishHostels(jsonURL string) (Markers, error) {
+	var hostels Markers
+	f, err := http.Get(jsonURL)
+	if err != nil {
+		return hostels, err
+	}
+	defer f.Body.Close()
+	bytes, _ := ioutil.ReadAll(f.Body)
+	hostels, err = jsonToMarkers(bytes)
+	return hostels, err
+}
 
 // osGridToMarker provides a wrapper around the functionality from cartconvert/osgb36
 func osGridToMarker(name, osGrid string) (Marker, error) {
@@ -16,7 +61,6 @@ func osGridToMarker(name, osGrid string) (Marker, error) {
 		return Marker{}, err
 	}
 	latlong := osgb36.OSGB36ToWGS84LatLong(coord)
-	fmt.Printf("%1.2f\n", latlong.Longitude)
 	return Marker{
 		Name:  name,
 		Lat:   latlong.Latitude,

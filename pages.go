@@ -26,7 +26,9 @@ This work by Ben Fuller is licensed under CC-BY-SA 4.0:
 http://creativecommons.org/licenses/by-sa/4.0/
 -->
 <!-- data source for markers are the Wikipedia articles
-"List of Waterfalls of the United Kingdom" and "List of Youth Hostels in England and Wales"
+"List of Waterfalls of the United Kingdom",
+"List of Youth Hostels in England and Wales",
+"List of Waterfalls of Scotland"
 which are licensed under CC-BY-SA 3.0. -->
 <!-- favicon source:
 Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
@@ -167,19 +169,19 @@ License: CC-BY 4.0 -->
 <p>
 The map below shows waterfalls with blue markers and hostels with brown markers. Markers for waterfalls in Scotland are smaller and slightly lighter so they can be more easily seen.
 
-All the YHA hostels in England and Wales are shown, and the hostels which are closest to a waterfall are larger.
-Note that none of the hostels in Scotland are shown (yet).
-
 Click on any marker to show its name and a link.
 
-Underneath there is a table showing for each waterfall which hostel is nearest, again with links to YHA hostel pages.
+All the YHA hostels in England and Wales are shown, and the hostels which are closest to a waterfall are larger.
+Hostels in Scotland are also shown, but they do not have links.
+
+Underneath there is a table showing for each waterfall which hostel is nearest, again with links.
 </p>
 <center>
 <iframe name="map" id="map" allowfullscreen="" src=` + fmt.Sprintf("%q", mapURL) + ` height="500" width="500" style="max-width:100%;"></iframe>
 </center>
 <p>You can see a fullscreen version of this map <a href=` + fmt.Sprintf("%q", mapURL) + `>here</a>.</p>
 ` + content + `
-
+<p>The data for the Scottish hostels was obtained from <a href="https://www.visitscotland.com">this website</a>.</p>
 <br>
 <footer>
 <div class="left" id="license">
@@ -238,9 +240,19 @@ func mapToTable(m map[string][]string, headers ...interface{}) string {
 // assumes a map variable called map in the rest of the js
 func markerToJS(m Markers, color, linkPrefix string) string {
 	var js string
-	markerTemplate := "new mapboxgl.Marker({color: %q, scale: %f}).setLngLat([%f,%f]).setPopup(new mapboxgl.Popup({offset: 25}).setHTML(\"<a href='%s%s'>%s</a>\")).addTo(map);\n"
+	markerTemplate := "new mapboxgl.Marker({color: %q, scale: %f}).setLngLat([%f,%f]).setPopup(new mapboxgl.Popup({offset: 25}).setHTML(\""
+	if linkPrefix != "" {
+		markerTemplate = markerTemplate + "<a href='%s%s'>%s</a>"
+	} else {
+		markerTemplate = markerTemplate + "%s"
+	}
+	markerTemplate = markerTemplate + "\")).addTo(map);\n"
 
 	for _, mark := range m.Markers {
+		if linkPrefix == "" {
+			js = js + fmt.Sprintf(markerTemplate, color, mark.scale, mark.Long, mark.Lat, mark.Name)
+			continue
+		}
 		// this bit making the link is a bit rough and some place names won't work
 		// but it's easier to manually fix broken links later in the html
 		var link string
